@@ -49,7 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entity\ConnectionConfig.cs" />
+    <Compile Include="Entity\ConnectionSetting.cs" />
     <Compile Include="Entity\Consumer.cs" />
     <Compile Include="Entity\Producer.cs" />
     <Compile Include="Library\ChannelFactory.cs" />

@@ -10,7 +10,7 @@ namespace RabbitMQClient.Library
 
         private static IConnection _connection;
 
-        public static IModel Create(ConnectionConfig connectionConfig)
+        public static IModel Create(ConnectionSetting connectionConfig)
         {
 
             var factory = new ConnectionFactory()
@@ -40,8 +40,9 @@ namespace RabbitMQClient.Library
 
         public static void CloseConnection()
         {
-            _connection.Close();
-            _connection.Dispose();
+            _connection?.Close();
+            _connection?.Dispose();
+            _connection = null;
         }
     }
 }

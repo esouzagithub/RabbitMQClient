@@ -7,40 +7,34 @@ namespace RabbitMQClient
 {
     public class QueueManager<T> : IDisposable
     {
-        private readonly IModel _channel;
-        private readonly Producer<T> _producer;
-        private readonly Consumer<T> _consumer;
-        public event Action<T, ulong> ReceiveMessage;
+        private IModel _channel;
+        public Producer<T> Producer { get; set; }
+        public Consumer<T> Consumer { get; set; }
+        private readonly string _queueName;
 
-        public QueueManager(ConnectionConfig connectionConfig, string queueName, ushort prefetchCount = 1, bool autoAck = false)
+        public QueueManager(string queueName)
         {
-            _channel = ChannelFactory.Create(connectionConfig);
-
-            this._producer = new Producer<T>(_channel, queueName);
-
-            this._consumer = new Consumer<T>(_channel, queueName, prefetchCount, autoAck);
-
-            this._consumer.ReceiveMessage += (arg1, arg2) => { ReceiveMessage?.Invoke(arg1, arg2); };
+            _queueName = queueName;
         }
 
-        public void WatchInit()
+        public QueueManager<T> WithConnectionSetting(ConnectionSetting connectionSetting)
         {
-            _consumer.InitializeObject();
+            _channel = ChannelFactory.Create(connectionSetting);
+
+            return this;
         }
 
-        public void Publish(T obj)
-        {
-            _producer.Publish(obj);
+        public QueueManager<T> WithConsumer(ushort prefetchCount = 1, bool autoAck = false) {
+
+            this.Consumer = new Consumer<T>(_channel, _queueName, prefetchCount, autoAck);
+
+            return this;
         }
 
-        public void Ack(ulong deliveryTag)
-        {
-            this._consumer.BasicAck(deliveryTag);
-        }
+        public QueueManager<T> WithProducer() {
 
-        public void NAck(ulong deliveryTag, bool requeued = true)
-        {
-            this._consumer.BasicNack(deliveryTag, requeued);
+            this.Producer = new Producer<T>(_channel, _queueName);
+            return this;
         }
 
         /// <summary>
@@ -64,9 +58,9 @@ namespace RabbitMQClient
             // Release managed resources if needed.
             if (disposeManaged)
             {
-                this._consumer.Dispose();
-                this._producer.Dispose();
-                this._channel.Dispose();
+                this.Consumer?.Dispose();
+                this.Producer?.Dispose();
+                this._channel?.Dispose();
                 ChannelFactory.CloseConnection();
             }
 

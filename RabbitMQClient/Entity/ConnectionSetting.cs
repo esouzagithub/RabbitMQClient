@@ -1,7 +1,7 @@
 ﻿
 namespace RabbitMQClient.Entity
 {
-    public sealed class ConnectionConfig
+    public sealed class ConnectionSetting
     {
         public string HostName { get; set; }
         public string VirtualHost { get; set; }
