@@ -22,7 +22,11 @@ namespace RabbitMQClient.Entity
             this._prefetchCount = prefetchCount;
         }
 
-        public void InitializeObject()
+        public void WatchInit() {
+            this.InitializeObject();
+        }
+
+        private void InitializeObject()
         {
             _channel.QueueDeclare(_queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
 
@@ -42,12 +46,12 @@ namespace RabbitMQClient.Entity
             _channel.BasicConsume(queue: _queueName, autoAck: _autoAck, consumer: consumer);
         }
 
-        public void BasicAck(ulong deliveryTag)
+        public void Ack(ulong deliveryTag)
         {
             _channel.BasicAck(deliveryTag, false);
         }
 
-        public void BasicNack(ulong deliveryTag, bool requeued = true)
+        public void Nack(ulong deliveryTag, bool requeued = true)
         {
             _channel.BasicNack(deliveryTag, false, requeued);
         }
