@@ -6,14 +6,44 @@ using RabbitMQ.Client.Events;
 
 namespace RabbitMQClient.Entity
 {
+    /// <summary>
+    /// Responsável por consumo de fila
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class Consumer<T> : IDisposable
     {
+        /// <summary>
+        /// Canal de comunicação com a fila
+        /// </summary>
         private readonly IModel _channel;
+
+        /// <summary>
+        /// Indica se a mensagem será removida ou não da fila
+        /// </summary>
         private readonly bool _autoAck;
+
+        /// <summary>
+        /// Descrição da fila
+        /// </summary>
         private readonly string _queueName;
+
+        /// <summary>
+        /// Controla o número de mensagem recebidas 
+        /// </summary>
         private readonly ushort _prefetchCount;
+
+        /// <summary>
+        /// Evento de recebimento da mensagem
+        /// </summary>
         public event Action<T, ulong> ReceiveMessage;
 
+        /// <summary>
+        /// Método construtor parametrizado
+        /// </summary>
+        /// <param name="channel">Indica se a mensagem será removida ou não da fila</param>
+        /// <param name="queueName">Descrição da fila</param>
+        /// <param name="prefetchCount">Controla o número de mensagem recebidas</param>
+        /// <param name="autoAck">Indica se a mensagem será removida ou não da fila</param>
         public Consumer(IModel channel, string queueName, ushort prefetchCount, bool autoAck)
         {
             this._channel = channel;
@@ -22,10 +52,16 @@ namespace RabbitMQClient.Entity
             this._prefetchCount = prefetchCount;
         }
 
+        /// <summary>
+        /// Inicia o consumidor e fica aguardando mensagens
+        /// </summary>
         public void WatchInit() {
             this.InitializeObject();
         }
 
+        /// <summary>
+        /// Cria o objeto consumidor
+        /// </summary>
         private void InitializeObject()
         {
             _channel.QueueDeclare(_queueName, durable: false, exclusive: false, autoDelete: false, arguments: null);
@@ -46,11 +82,20 @@ namespace RabbitMQClient.Entity
             _channel.BasicConsume(queue: _queueName, autoAck: _autoAck, consumer: consumer);
         }
 
+        /// <summary>
+        /// Remove a mensagem da fila
+        /// </summary>
+        /// <param name="deliveryTag"></param>
         public void Ack(ulong deliveryTag)
         {
             _channel.BasicAck(deliveryTag, false);
         }
 
+        /// <summary>
+        /// Retorna a mensagem da fila
+        /// </summary>
+        /// <param name="deliveryTag"></param>
+        /// <param name="requeued"></param>
         public void Nack(ulong deliveryTag, bool requeued = true)
         {
             _channel.BasicNack(deliveryTag, false, requeued);
